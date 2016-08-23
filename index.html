@@ -53,7 +53,7 @@
 
                 //метод получения данных юзера
                 getUserName: function (id) {
-                    var name = null;
+                    var name = 'Не удалось найти';
 
                     VK.Api.call('users.get', {user_ids: id}, function (r) {
                         if (r.response) {

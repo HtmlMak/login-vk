@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Авторизация VK</title>
+    <script src="//vk.com/js/api/openapi.js"></script>
+    <script src="http://code.angularjs.org/angular-1.0.1.js"></script>
+    <script>
+
+        var app = angular.module('app', []);
+
+        app.factory('user', ['$log', '$rootScope', function ($log, $rootScope) {
+            var vk = {
+                appID: 5601722,
+                appPermissions: 1,
+
+                //инициализация
+                init: function () {
+                    VK.init({apiId: vk.appID});
+                    vk.access(function (id) {
+                        vk.getUserName(id);
+                    });
+                },
+
+                //метод входа
+                login: function (callback) {
+
+                    function authInfo(response) {
+                        if (response.session) { // Авторизация успешна
+                            callback(response.session.mid);
+                        } else {
+                            $log.log("Авторизоваться не удалось!");
+                        }
+                    }
+
+                    VK.Auth.login(authInfo, vk.appPermissions);
+                },
+
+                //метод выхода
+                logout: function () {
+                    VK.Auth.logout(function () {
+                        window.location.reload();
+                    });
+                },
+
+                //метод проверки доступа
+                access: function (callback) {
+                    VK.Auth.getLoginStatus(function (response) {
+                        if (response.session) { // Пользователь авторизован
+                            callback(response.session.mid);
+                        }
+                    })
+                },
+
+                //метод получения данных юзера
+                getUserName: function (id) {
+                    var name = null;
+
+                    VK.Api.call('users.get', {user_ids: id}, function (r) {
+                        if (r.response) {
+                            name = r.response[0].first_name + ' ' + r.response[0].last_name;
+                            $rootScope.$broadcast('user:name', name);
+                            /* angular.element(document.getElementById("login-ctrl")).scope().$apply(function ($scope) {
+                             $scope.name = name;
+                             });*/
+                        }
+                    });
+                }
+            };
+
+            vk.init();
+
+            return vk;
+        }]);
+
+
+        function loginCtrl($scope, user) {
+
+            $scope.userName = null;
+
+            $scope.login = function () {
+
+                user.login(function (id) {
+                    user.getUserName(id);
+                });
+
+            };
+
+            $scope.logout = function () {
+                user.logout();
+            };
+
+            $scope.$on('user:name', function (event, userName) {
+                $scope.userName = userName;
+                $scope.$digest();
+            });
+
+
+        }
+    </script>
+</head>
+<body ng-app="app" ng-cloak>
+<div ng-controller="loginCtrl" id="login-ctrl">
+    <div ng-bind="userName"></div>
+
+    <button ng-click="login();" ng-show="userName == null">Войти через VK</button>
+    <button ng-click="logout();" ng-show="userName != null">Выйти</button>
+</div>
+</body>
+</html>

@@ -59,9 +59,7 @@
                         if (r.response) {
                             name = r.response[0].first_name + ' ' + r.response[0].last_name;
                             $rootScope.$broadcast('user:name', name);
-                            /* angular.element(document.getElementById("login-ctrl")).scope().$apply(function ($scope) {
-                             $scope.name = name;
-                             });*/
+
                         }
                     });
                 }

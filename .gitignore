@@ -5,6 +5,7 @@ Thumbs.db
 
 #phpstorm project files
 .idea
+.idea/copyright/profiles_settings.xml
 #netbeans project files
 nbproject
 
